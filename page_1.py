@@ -12,7 +12,8 @@ from langchain_tavily import TavilySearch
 load_dotenv()
 model = init_chat_model('gpt-5.4-mini')
 
-tool = TavilySearch(
+
+Tavily_Search = TavilySearch(
     max_results=5,
     topic="general",
     # include_answer=False,
@@ -32,7 +33,7 @@ def get_weather(location : str) -> str:
     return f'{location}의 날씨는 -5도에 미세먼지는 매우 나쁨'
 
 
-agent = create_agent(model, tools=[get_weather])
+agent = create_agent(model, tools=[get_weather, Tavily_Search])
 
 st.title('1페이지 입니다.')
 if 'messages' not in st.session_state:
@@ -42,11 +43,11 @@ prompt = st.chat_input('무엇이든 물어보세요')
 
 
 if prompt:
-    response = model.invoke(
+    response = agent.invoke(
         {'messages' : [{'role' : 'user', 'content' : prompt}]}
     )
     st.session_state.messages.append({'role' : 'user', 'content': prompt})
-    st.session_state.messages.append({'role' : 'ai', 'content': response.content})
+    st.session_state.messages.append({'role' : 'ai', 'content': response['messages'][-1].content})
 
 for message in st.session_state.messages :
     with st.chat_message(message['role']):
